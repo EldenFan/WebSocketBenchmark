@@ -4,9 +4,52 @@
     {
         #region Fields
 
-        private ulong sequency;
+        private ulong sequence;
 
         private CancellationTokenSource cancellationTokenSource;
+
+        private ushort lastValue;
+
+        private DateTime lastTimeGenerated = DateTime.Now;
+
+        private object lockValues = new object();
+
+        #endregion
+
+        #region Public property
+
+        public ushort LastValue
+        {
+            get
+            {
+                lock (lockValues)
+                {
+                    return lastValue;
+                }
+            }
+        }
+
+        public ulong Sequence
+        {
+            get
+            {
+                lock (lockValues)
+                {
+                    return sequence;
+                }
+            }
+        }
+
+        public DateTime GenerateLastTime
+        {
+            get
+            {
+                lock (lockValues)
+                {
+                    return lastTimeGenerated;
+                }
+            }
+        }
 
         #endregion
 
@@ -31,9 +74,14 @@
         {
             while (!token.IsCancellationRequested)
             {
-                var value = modbusModule.Read();
-                sequency++;
-                ValueRecieved?.Invoke(sequency, value);
+                lock (lockValues)
+                {
+                    lastValue = modbusModule.Read();
+                    sequence++;
+                    lastTimeGenerated = DateTime.Now;
+                }
+
+                ValueChanged?.Invoke(sequence, lastValue, DateTime.Now);
                 await Task.Delay(100, token);
             }
         }
@@ -42,7 +90,7 @@
 
         #region Events
 
-        public event Action<ulong, ushort> ValueRecieved;
+        public event Action<ulong, ushort, DateTime> ValueChanged;
 
         #endregion
     }

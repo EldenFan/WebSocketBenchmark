@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.37314.3 d17.14
+VisualStudioVersion = 17.14.37314.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebSocketBenchmark", "WebSocketBenchmark\WebSocketBenchmark.csproj", "{65B059CB-8178-4B35-BE7D-CB8753FED390}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ModbusModule", "ModbusModule\ModbusModule.csproj", "{6D11CF67-FDA5-48A2-9F5F-FBE5699EE608}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestLauncher", "TestLauncher\TestLauncher.csproj", "{D2412FA2-0FE8-4732-9CEA-1A5EE7C5C9D1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{6D11CF67-FDA5-48A2-9F5F-FBE5699EE608}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6D11CF67-FDA5-48A2-9F5F-FBE5699EE608}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6D11CF67-FDA5-48A2-9F5F-FBE5699EE608}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2412FA2-0FE8-4732-9CEA-1A5EE7C5C9D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2412FA2-0FE8-4732-9CEA-1A5EE7C5C9D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2412FA2-0FE8-4732-9CEA-1A5EE7C5C9D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2412FA2-0FE8-4732-9CEA-1A5EE7C5C9D1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

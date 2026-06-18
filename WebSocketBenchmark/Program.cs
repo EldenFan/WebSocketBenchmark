@@ -1,26 +1,69 @@
 using ModbusModule;
 using Modbus = ModbusModule.ModbusModule;
 
-var builder = WebApplication.CreateBuilder(args);
-
-var modbusModule = new Modbus();
-var pollingService = new PollingService(modbusModule);
-
-pollingService.ValueRecieved += (sequence, value) =>
+namespace WebSocketBenchmark
 {
-    Console.WriteLine($"[{DateTime.Now:HH:mm:ss.fff}] Sequence: {sequence}, Value: {value}");
-};
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            builder.WebHost.UseUrls("http://*:5000");
 
-pollingService.Start();
+            var longPollingManager = new LongPollingService();
 
-var app = builder.Build();
+            var modbusModule = new Modbus();
+            var pollingService = new PollingService(modbusModule);
+            pollingService.Start();
+            pollingService.ValueChanged += longPollingManager.Notify;
 
-app.MapGet("/", () => "Modbus polling is running. Check console for readings.");
+            var app = builder.Build();
 
-app.Lifetime.ApplicationStopping.Register(() =>
-{
-    Console.WriteLine("Stopping polling service...");
-    pollingService.Stop();
-});
+            app.MapGet("/api/shortPolling", () =>
+            {
+                return Results.Ok(new
+                {
+                    pollingService.Sequence,
+                    Value = pollingService.LastValue,
+                    Timestamp = pollingService.GenerateLastTime
+                });
+            });
 
-app.Run();
+            app.MapGet("/api/longPolling", async (ulong lastSequence, CancellationToken cancellationToken) =>
+            {
+                if (pollingService.Sequence > lastSequence)
+                {
+                    return Results.Ok(new
+                    {
+                        pollingService.Sequence,
+                        Value = pollingService.LastValue,
+                        Timestamp = pollingService.GenerateLastTime
+                    });
+                }
+
+                using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+
+                using var linked = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken, timeout.Token);
+
+                try
+                {
+                    var (Sequence, Value, Timestamp) = await longPollingManager.WaitForUpdateAsync(linked.Token);
+
+                    return Results.Ok(new
+                    {
+                        Sequence,
+                        Value,
+                        Timestamp
+                    });
+                }
+                catch (TaskCanceledException)
+                {
+                    return Results.NoContent();
+                }
+            });
+
+            app.Lifetime.ApplicationStopping.Register(pollingService.Stop);
+            app.Run();
+        }
+    }
+}
