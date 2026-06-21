@@ -4,6 +4,6 @@
     {
         public ulong Sequence { get; set; }
         public ushort Value { get; set; }
-        public DateTime Timestamp { get; set; }
+        public DateTime TimeStamp { get; set; }
     }
 }

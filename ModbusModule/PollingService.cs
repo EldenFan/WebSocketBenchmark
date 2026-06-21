@@ -1,56 +1,22 @@
-﻿namespace ModbusModule
+﻿using System.Collections.Concurrent;
+
+namespace ModbusModule
 {
     public class PollingService(ModbusModule modbusModule)
     {
         #region Fields
-
         private ulong sequence;
-
         private CancellationTokenSource cancellationTokenSource;
-
         private ushort lastValue;
-
-        private DateTime lastTimeGenerated = DateTime.Now;
-
-        private object lockValues = new object();
-
+        private DateTime lastTimeGenerated = DateTime.UtcNow;
+        private readonly object lockValues = new();
+        private readonly ConcurrentDictionary<ulong, (ushort Value, DateTime Timestamp)> history = new();
         #endregion
 
-        #region Public property
-
-        public ushort LastValue
-        {
-            get
-            {
-                lock (lockValues)
-                {
-                    return lastValue;
-                }
-            }
-        }
-
-        public ulong Sequence
-        {
-            get
-            {
-                lock (lockValues)
-                {
-                    return sequence;
-                }
-            }
-        }
-
-        public DateTime GenerateLastTime
-        {
-            get
-            {
-                lock (lockValues)
-                {
-                    return lastTimeGenerated;
-                }
-            }
-        }
-
+        #region Public properties
+        public ushort LastValue { get { lock (lockValues) return lastValue; } }
+        public ulong Sequence { get { lock (lockValues) return sequence; } }
+        public DateTime GenerateLastTime { get { lock (lockValues) return lastTimeGenerated; } }
         #endregion
 
         #region Public methods
@@ -61,9 +27,19 @@
             Task.Run(() => Execute(cancellationTokenSource.Token));
         }
 
-        public void Stop()
+        public void Stop() => cancellationTokenSource?.Cancel();
+
+        public bool TryGetState(ulong seq, out ushort value, out DateTime timestamp)
         {
-            cancellationTokenSource?.Cancel();
+            if (history.TryGetValue(seq, out var state))
+            {
+                value = state.Value;
+                timestamp = state.Timestamp;
+                return true;
+            }
+            value = 0;
+            timestamp = default;
+            return false;
         }
 
         #endregion
@@ -78,20 +54,22 @@
                 {
                     lastValue = modbusModule.Read();
                     sequence++;
-                    lastTimeGenerated = DateTime.Now;
+                    lastTimeGenerated = DateTime.UtcNow;
+                    history[sequence] = (lastValue, lastTimeGenerated);
                 }
 
-                ValueChanged?.Invoke(sequence, lastValue, DateTime.Now);
+                if (sequence > 200)
+                {
+                    history.TryRemove(sequence - 200, out _);
+                }
+
+                ValueChanged?.Invoke(sequence, lastValue, DateTime.UtcNow);
+
                 await Task.Delay(100, token);
             }
         }
-
         #endregion
-
-        #region Events
 
         public event Action<ulong, ushort, DateTime> ValueChanged;
-
-        #endregion
     }
 }
