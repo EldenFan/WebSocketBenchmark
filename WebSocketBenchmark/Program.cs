@@ -9,6 +9,7 @@ namespace WebSocketBenchmark
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.WebHost.UseUrls("http://*:5000");
+            builder.Services.AddHostedService<ResourceMonitorService>();
 
             var longPollingManager = new LongPollingService();
             var webSocketManager = new WebSocketManager();
