@@ -1,0 +1,1 @@
+__LOCATED_VAR(INT,__MW0,M,W,0)

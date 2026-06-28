@@ -12,7 +12,7 @@ namespace ModbusModule
             client = new ModbusTcpClient();
 
             string modbusIp = Environment.GetEnvironmentVariable("MODBUS_IP") ?? "127.0.0.1";
-            string modbusPort = Environment.GetEnvironmentVariable("MODBUS_PORT") ?? "500";
+            string modbusPort = Environment.GetEnvironmentVariable("MODBUS_PORT") ?? "502";
 
             client.Connect(IPEndPoint.Parse($"{modbusIp}:{modbusPort}"), ModbusEndianness.BigEndian);
         }

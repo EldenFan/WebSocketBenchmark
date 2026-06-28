@@ -1,0 +1,52 @@
+{
+  "meta": {
+    "name": "test",
+    "type": "plc-project"
+  },
+  "data": {
+    "dataTypes": [],
+    "pous": [],
+    "configuration": {
+      "resource": {
+        "tasks": [
+          {
+            "name": "task0",
+            "triggering": "Cyclic",
+            "interval": "T#200ms",
+            "priority": 0
+          }
+        ],
+        "instances": [
+          {
+            "name": "instance0",
+            "task": "task0",
+            "program": "main"
+          }
+        ],
+        "globalVariables": []
+      }
+    },
+    "servers": [
+      {
+        "name": "test",
+        "protocol": "modbus-tcp",
+        "modbusSlaveConfig": {
+          "enabled": true,
+          "networkInterface": "0.0.0.0",
+          "port": 502
+        }
+      }
+    ],
+    "remoteDevices": [],
+    "debugVariables": {
+      "pous": {
+        "main": [
+          "output"
+        ]
+      }
+    },
+    "deletedPous": [],
+    "deletedServers": [],
+    "deletedRemoteDevices": []
+  }
+}

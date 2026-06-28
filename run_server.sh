@@ -9,9 +9,9 @@ echo "Введите MODBUS_IP (по умолчанию: 192.168.31.250):"
 read input_ip
 export MODBUS_IP=${input_ip:-192.168.31.250}
 
-echo "Введите MODBUS_PORT (по умолчанию: 500):"
+echo "Введите MODBUS_PORT (по умолчанию: 502):"
 read input_port
-export MODBUS_PORT=${input_port:-500}
+export MODBUS_PORT=${input_port:-502}
 
 echo "Запускаем сервер..."
 docker compose up -d --build
