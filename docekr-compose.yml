@@ -1,0 +1,10 @@
+services:
+  websocket-benchmark:
+    build: .
+    container_name: websocketbenchmark
+    ports:
+      - "5000:5000"
+    environment:
+      - MODBUS_IP=${MODBUS_IP}
+      - MODBUS_PORT=${MODBUS_PORT}
+    restart: always

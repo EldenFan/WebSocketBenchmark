@@ -1,4 +1,5 @@
 ﻿using FluentModbus;
+using System.Net;
 
 namespace ModbusModule
 {
@@ -10,7 +11,10 @@ namespace ModbusModule
         {
             client = new ModbusTcpClient();
 
-            client.Connect(ModbusEndianness.BigEndian);
+            string modbusIp = Environment.GetEnvironmentVariable("MODBUS_IP") ?? "127.0.0.1";
+            string modbusPort = Environment.GetEnvironmentVariable("MODBUS_PORT") ?? "500";
+
+            client.Connect(IPEndPoint.Parse($"{modbusIp}:{modbusPort}"), ModbusEndianness.BigEndian);
         }
 
         public ushort Read()

@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net.Http.Json;
 using System.Net.WebSockets;
 using System.Text.Json;
@@ -13,12 +12,20 @@ namespace TestLauncher
 
         private static readonly List<int> clientsTestNumbers = [1, 10, 30, 50, 100, 500, 1000];
 
-        private static readonly string interfaceIndex = "8";
-        private static readonly string serverPort = "5000";
+        private static string interfaceIndex = "8";
+        private static string serverIp = "127.0.0.1";
+        private static string serverPort = "5000";
         private static readonly int testDurationSec = 30;
 
         static async Task Main(string[] args)
         {
+            if (args.Length >= 3)
+            {
+                interfaceIndex = args[0];
+                serverIp = args[1];
+                serverPort = args[2];
+            }
+
             foreach (int i in clientsTestNumbers)
             {
                 Console.WriteLine($"Количество клиентов: {i}");
@@ -45,7 +52,7 @@ namespace TestLauncher
                     {
                         try
                         {
-                            var response = await client.GetAsync("http://localhost:5000/api/shortPolling", cts.Token);
+                            var response = await client.GetAsync($"http://{serverIp}:{serverPort}/api/shortPolling", cts.Token);
                         }
                         catch
                         {
@@ -74,7 +81,7 @@ namespace TestLauncher
                     {
                         try
                         {
-                            var response = await client.GetAsync($"http://localhost:5000/api/longPolling?lastSequence={sequence}", cts.Token);
+                            var response = await client.GetAsync($"http://{serverIp}:{serverPort}/api/longPolling?lastSequence={sequence}", cts.Token);
                             var data = await response.Content.ReadFromJsonAsync<Response>(cancellationToken: cts.Token);
                             if (data == null) continue;
                             sequence = data.Sequence;
@@ -103,7 +110,7 @@ namespace TestLauncher
 
                     try
                     {
-                        await ws.ConnectAsync(new Uri("ws://localhost:5000/api/ws"), cts.Token);
+                        await ws.ConnectAsync(new Uri($"ws://{serverIp}:{serverPort}/api/ws"), cts.Token);
                         var buffer = new byte[4096];
 
                         while (ws.State == WebSocketState.Open && !cts.Token.IsCancellationRequested)
@@ -136,7 +143,7 @@ namespace TestLauncher
             var tsharkStartInfo = new ProcessStartInfo
             {
                 FileName = "tshark.exe",
-                Arguments = $"-i {interfaceIndex} -f \"tcp port {serverPort}\" -w {pcapFile} -q",
+                Arguments = $"-i {interfaceIndex} -f \"host {serverIp} and tcp port {serverPort}\" -w {pcapFile} -q",
                 CreateNoWindow = true,
                 UseShellExecute = false
             };
