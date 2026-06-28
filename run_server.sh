@@ -26,9 +26,10 @@ echo "Time,CPU,Memory,MemPerc,PIDs" > "$METRICS_FILE"
 (
   while true
   do
-    docker stats "$CONTAINER_NAME" --no-stream \
-      --format "{{.Time}},{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}},{{.PIDs}}" \
-      >> "$METRICS_FILE"
+    TIMESTAMP=$(date +"%H:%M:%S")
+    STATS=$(docker stats "$CONTAINER_NAME" --no-stream --format "{{.CPUPerc}},{{.MemUsage}},{{.MemPerc}},{{.PIDs}}")
+    
+    echo "$TIMESTAMP,$STATS" >> "$METRICS_FILE"
     sleep 1
   done
 ) &
