@@ -26,13 +26,17 @@ namespace WebSocketBenchmark
 
         public void Notify(ulong sequence, ushort value, DateTime timeStamp)
         {
-            foreach (var pair in waiters)
+            Task.Run(() =>
             {
-                if (waiters.TryRemove(pair.Key, out var tcs))
+                foreach (var pair in waiters)
                 {
-                    tcs.TrySetResult((sequence, value, timeStamp));
+                    if (waiters.TryRemove(pair.Key, out var tcs))
+                    {
+                        tcs.TrySetResult((sequence, value, timeStamp));
+                    }
                 }
             }
+            );
         }
     }
 }
